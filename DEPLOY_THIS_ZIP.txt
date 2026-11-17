@@ -1,0 +1,63 @@
+NEXUS AUTOMATION HUB - VERCEL DROP ZIP (NO DATABASE)
+====================================================
+
+WHAT THIS IS
+------------
+This ZIP contains only the cloud dashboard/API. Drop it on Vercel and it
+builds by itself. No Git, no CLI, no Supabase, no environment variables.
+
+Automations never run on Vercel. They run on your Windows PC through the
+local runner in the full Automation Hub ZIP.
+
+DEPLOY (about 2 minutes)
+------------------------
+1. Open https://vercel.com/drop in Chrome or Edge and sign in.
+2. Drag THIS ZIP file onto the page (do not unzip it first).
+3. Choose your team, enter a project name (for example automation-hub),
+   and press Deploy.
+4. Wait for the build to finish, then copy the URL Vercel gives you,
+   for example: https://automation-hub-xxxx.vercel.app
+
+CONNECT YOUR PC
+---------------
+1. Extract the FULL Automation Hub ZIP on the PC, for example to
+   C:\AutomationHub.
+2. Double-click START_AUTOMATION_HUB.bat.
+3. Choose 5 once if dependencies are not installed yet.
+4. Choose 1 (Cloud dashboard + runner on this PC).
+5. Paste the Vercel URL.
+6. At "Runner secret [local-dev-runner]" just press Enter.
+7. Wait for [CONNECTED] ... ONLINE in the runner window.
+8. Open the Vercel URL. The top-right chip should show this PC's name.
+   If it does not, click the chip and use the pairing code printed by
+   launcher option 6.
+
+START A JOB
+-----------
+Click Run on any automation. The job is pinned to your PC, Chrome opens
+locally, and logs stream into the dashboard.
+
+IMPORTANT - TEMPORARY MEMORY
+----------------------------
+This build has no database. Jobs, machines and logs live in temporary
+cloud memory and reset when Vercel sleeps, redeploys, or switches server
+instances. The runner reconnects by itself within a few seconds, but job
+history is not permanent. That is the trade-off for zero setup.
+
+If you later want permanent history, use the full ZIP with Supabase and
+set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in Vercel.
+
+OPTIONAL LOCK-DOWN
+------------------
+This build accepts the default runner secret "local-dev-runner" so it
+works with zero setup. To require your own secret:
+1. Vercel project -> Settings -> Environment Variables.
+2. Add RUNNER_SECRET_TOKEN with a long random value.
+3. Redeploy.
+4. In the launcher, enter that same value at the Runner secret prompt.
+
+SECURITY
+--------
+The cloud dashboard stores no candidate credentials. The packages/.env
+files stay on your PC, inside the full ZIP. Never upload those to Vercel
+or GitHub.
