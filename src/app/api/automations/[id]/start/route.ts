@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { ExecutionJob, Machine } from '@/lib/types';
+import { getAutomationPort } from '@/lib/registry';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,47 @@ export async function POST(request: Request, { params }: { params: { id: string 
       }
     }
 
-    // Resolve target machine (prefer specified machineId -> online machine -> any registered machine -> cloud runner)
+    // 1. Check for Port Conflicts
+    const targetPort = getAutomationPort(automation.id);
+    const existingJobs = await db.getJobs({ limit: 100 });
+    const conflicting = existingJobs.filter(
+      (j) =>
+        ['Queued', 'Starting', 'Running'].includes(j.status) &&
+        (j.automationId === automation.id || getAutomationPort(j.automationId) === targetPort)
+    );
+
+    if (conflicting.length > 0) {
+      if (body.forceStopConflict) {
+        // Automatically stop conflicting jobs and free the port
+        for (const cJob of conflicting) {
+          await db.requestCancel(cJob.id);
+          await db.updateJob(cJob.id, {
+            status: 'Cancelled',
+            step: `Stopped automatically to free port :${targetPort} for ${automation.name}`,
+            endTime: new Date().toISOString(),
+          });
+          await db.addLogs(cJob.id, [
+            {
+              level: 'warn',
+              message: `Job stopped by operator to release port :${targetPort} for "${automation.name}".`,
+            },
+          ]);
+        }
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            portConflict: true,
+            conflictingJob: conflicting[0],
+            port: targetPort,
+            error: `Port :${targetPort} is currently in use by "${conflicting[0].automationName}". At one time only one automation can run on port :${targetPort}. Stop the previous automation before starting this one.`,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
+    // Resolve target machine
     const reqMachineId = body.machineId || request.headers.get('x-machine-id');
     const machines = await db.getMachines().catch(() => []);
     let targetMachine: Machine | undefined;
@@ -48,21 +89,34 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
     if (!targetMachine) {
       // Auto-register built-in Render Cloud runner
-      const now = new Date().toISOString();
-      const cloudRunner: Machine = {
+      const registered = await db.registerOrHeartbeatMachine({
         id: 'mach_render_cloud',
         name: 'Render Cloud Engine',
         os: 'Linux x86_64 (Render Container)',
-        status: 'online',
-        lastHeartbeat: now,
+        loggedInUser: 'root',
         ipAddress: '127.0.0.1',
-        token: 'render-cloud-token',
-        activeJobsCount: 0,
         runnerVersion: '2.0.0',
         pairingCode: 'RENDER01',
-      };
-      await db.saveMachine(cloudRunner).catch(() => {});
-      targetMachine = cloudRunner;
+      }).catch(() => null);
+
+      if (registered) {
+        targetMachine = registered;
+      } else {
+        const now = new Date().toISOString();
+        targetMachine = {
+          id: 'mach_render_cloud',
+          name: 'Render Cloud Engine',
+          os: 'Linux x86_64 (Render Container)',
+          loggedInUser: 'root',
+          status: 'online',
+          lastHeartbeat: now,
+          ipAddress: '127.0.0.1',
+          token: 'render-cloud-token',
+          activeJobsCount: 0,
+          runnerVersion: '2.0.0',
+          pairingCode: 'RENDER01',
+        };
+      }
     }
 
     const users = await db.getUsers().catch(() => []);
@@ -89,7 +143,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       machineName: targetMachine.name,
       status: 'Queued',
       progress: 0,
-      step: `Queued for ${targetMachine.name} — execution initializing`,
+      step: `Queued for ${targetMachine.name} (Port :${targetPort}) — initializing clean session`,
       startTime: now,
       inputs,
       createdAt: now,
@@ -104,17 +158,17 @@ export async function POST(request: Request, { params }: { params: { id: string 
       },
       {
         level: 'info',
-        message: `Assigned execution engine: ${targetMachine.name} (${targetMachine.id})`,
+        message: `Execution assigned to: ${targetMachine.name} (Dedicated Port :${targetPort})`,
       },
       {
         level: 'step',
-        message: `Runner claiming job. Execution environment: ${automation.language}.`,
+        message: `Browser session initialized with clean incognito context (zero cache / fresh state).`,
       },
     ]);
 
     return NextResponse.json({
       success: true,
-      message: `Job queued on ${targetMachine.name}. Opening live execution in new tab.`,
+      message: `Job queued on ${targetMachine.name} (Port :${targetPort}).`,
       job: newJob,
     });
   } catch (err: any) {

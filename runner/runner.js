@@ -417,13 +417,15 @@ function openInChrome(url) {
   const browser = chromeCandidates().find((candidate) => fs.existsSync(candidate));
   try {
     if (browser) {
-      const child = spawn(browser, ['--new-window', url], {
+      const isEdge = /msedge/i.test(browser);
+      const incognitoFlag = isEdge ? '--inprivate' : '--incognito';
+      const child = spawn(browser, ['--new-window', incognitoFlag, '--disable-cache', url], {
         detached: true,
         stdio: 'ignore',
         windowsHide: false,
       });
       child.unref();
-      console.log(`[BROWSER] Opened ${url} in ${path.basename(browser)}`);
+      console.log(`[BROWSER] Opened clean session ${url} in ${path.basename(browser)} (${incognitoFlag} - no port cache)`);
       return;
     }
     exec(`start "" "${url}"`);

@@ -65,18 +65,33 @@ export default function AutomationDetailPage({ params }: { params: { id: string 
 
   const canRun = true;
 
-  const handleStart = async () => {
+  const handleStart = async (forceStop = false) => {
     if (!automation) return;
+    const newTab = window.open("about:blank", "_blank");
     setStarting(true);
     setMessage(null);
     try {
-      const job = await startJob(automation.id, inputs);
+      const job = await startJob(automation.id, inputs, forceStop);
+      if (newTab) {
+        newTab.location.href = `/live?jobId=${job.id}`;
+      } else {
+        window.open(`/live?jobId=${job.id}`, "_blank");
+      }
       setMessage({
         type: "success",
-        text: `Queued on ${job.machineName}. Execution started in a new tab!`,
+        text: `Queued on ${job.machineName}. Execution started in new tab!`,
       });
-      window.open(`/live?jobId=${job.id}`, "_blank");
     } catch (err: any) {
+      if (newTab) newTab.close();
+      if (err.portConflict) {
+        const confirmStop = window.confirm(
+          `Port :${err.port || "in use"} conflict: "${err.conflictingJob?.automationName || "Another automation"}" is currently running. Stop it and start "${automation.name}"?`
+        );
+        if (confirmStop) {
+          handleStart(true);
+          return;
+        }
+      }
       setMessage({ type: "error", text: err.message });
     } finally {
       setStarting(false);

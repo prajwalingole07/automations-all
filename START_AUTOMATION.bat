@@ -22,12 +22,12 @@ if exist "cloud_url.txt" (
 
 echo [1/3] Target Cloud Hub: %TARGET_URL%
 
-:: 1. Launch Chrome / Default Browser directly to Render Dashboard in a new tab
-echo [2/3] Launching Render Dashboard in Chrome...
+:: 1. Launch Chrome / Default Browser directly to Render Dashboard in a clean incognito window
+echo [2/3] Launching Render Dashboard in clean browser window...
 if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" (
-    start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" "%TARGET_URL%/dashboard"
+    start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --new-window --incognito "%TARGET_URL%/dashboard"
 ) else if exist "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" (
-    start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "%TARGET_URL%/dashboard"
+    start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --new-window --inprivate "%TARGET_URL%/dashboard"
 ) else (
     start "" "%TARGET_URL%/dashboard"
 )

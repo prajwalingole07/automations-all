@@ -10,21 +10,19 @@ export async function GET() {
     
     // Seed Render Cloud Engine if no machine exists yet
     if (!machines || machines.length === 0) {
-      const now = new Date().toISOString();
-      const defaultMachine: Machine = {
+      const defaultMachine = await db.registerOrHeartbeatMachine({
         id: 'mach_render_cloud',
         name: 'Render Cloud Engine',
         os: 'Linux (Render Container)',
-        status: 'online',
-        lastHeartbeat: now,
-        ipAddress: '127.0.0.1',
-        token: 'render-cloud-token',
-        activeJobsCount: 0,
+        loggedInUser: 'root',
         runnerVersion: '2.0.0',
+        ipAddress: '127.0.0.1',
         pairingCode: 'RENDER01',
-      };
-      await db.saveMachine(defaultMachine).catch(() => {});
-      machines = [defaultMachine];
+      }).catch(() => null);
+
+      if (defaultMachine) {
+        machines = [defaultMachine];
+      }
     }
 
     const safe = machines.map(({ token, ...rest }) => rest);

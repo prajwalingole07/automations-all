@@ -166,9 +166,13 @@ function LiveMonitor() {
               <Download className="h-3.5 w-3.5" /> Logs
             </button>
             {isLive ? (
-              <button onClick={handleCancel} disabled={cancelling} className="btn btn-danger">
-                {cancelling ? <Spinner /> : <CircleStop className="h-3.5 w-3.5" />}
-                {cancelling ? "Cancelling…" : "Cancel job"}
+              <button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="flex items-center gap-2 rounded-xl border border-rose-500/50 bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-rose-600/20 hover:bg-rose-500"
+              >
+                {cancelling ? <Spinner className="h-3.5 w-3.5" /> : <CircleStop className="h-4 w-4" />}
+                {cancelling ? "Stopping…" : "⏹ Stop Automation"}
               </button>
             ) : (
               <button onClick={handleRetry} disabled={retrying || !runner} className="btn btn-primary">

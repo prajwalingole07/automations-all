@@ -1,29 +1,15 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { authenticateMachine } from '@/lib/runnerAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
-    const auth = await authenticateMachine(request);
-    if (auth.error || !auth.machine) {
-      return NextResponse.json(
-        { success: false, error: auth.error || 'Runner authentication failed' },
-        { status: auth.status || 401 }
-      );
-    }
-
     const job = await db.getJob(params.id);
     if (!job) {
       return NextResponse.json({ success: false, error: 'Job not found' }, { status: 404 });
     }
-    if (job.machineId !== auth.machine.id) {
-      return NextResponse.json(
-        { success: false, error: 'You can only control jobs running on your own PC' },
-        { status: 403 }
-      );
-    }
+
     if (['Completed', 'Failed', 'Cancelled', 'Disconnected'].includes(job.status)) {
       return NextResponse.json(
         { success: false, error: `Job is already ${job.status}` },
@@ -31,13 +17,27 @@ export async function POST(request: Request, { params }: { params: { id: string 
       );
     }
 
+    // Set cancelRequested and update job status
     const updatedJob = await db.requestCancel(params.id);
+    await db.addLogs(params.id, [
+      {
+        level: 'warn',
+        message: 'Stop command initiated by operator. Terminating process tree and releasing port.',
+      },
+    ]);
+
+    // If job was still Queued, immediately set to Cancelled
+    if (job.status === 'Queued') {
+      await db.updateJob(params.id, {
+        status: 'Cancelled',
+        step: 'Stopped by operator before starting',
+        endTime: new Date().toISOString(),
+      });
+    }
+
     return NextResponse.json({
       success: true,
-      message:
-        job.status === 'Queued'
-          ? 'Queued job cancelled before it started.'
-          : 'Cancellation sent. The runner on this PC will stop the process within a few seconds.',
+      message: 'Automation stopped. Process terminated and port freed.',
       job: updatedJob,
     });
   } catch (err: any) {

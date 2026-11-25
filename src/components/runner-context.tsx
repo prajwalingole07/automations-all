@@ -28,7 +28,7 @@ interface RunnerContextValue {
   switchMachine: (machineId: string) => void;
   pair: (code: string) => Promise<void>;
   unpair: () => void;
-  startJob: (automationId: string, inputs: Record<string, any>) => Promise<any>;
+  startJob: (automationId: string, inputs: Record<string, any>, forceStopConflict?: boolean) => Promise<any>;
   cancelJob: (jobId: string) => Promise<any>;
   clearError: () => void;
 }
@@ -198,8 +198,8 @@ export function RunnerProvider({ children }: { children: React.ReactNode }) {
   }, [refresh]);
 
   const startJob = useCallback(
-    async (automationId: string, inputs: Record<string, any>) => {
-      const payload: Record<string, any> = { inputs };
+    async (automationId: string, inputs: Record<string, any>, forceStopConflict = false) => {
+      const payload: Record<string, any> = { inputs, forceStopConflict };
       if (runner?.machineId) {
         payload.machineId = runner.machineId;
       }
@@ -213,7 +213,11 @@ export function RunnerProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Could not start the automation");
+        const err: any = new Error(data.error || "Could not start the automation");
+        err.portConflict = data.portConflict;
+        err.conflictingJob = data.conflictingJob;
+        err.port = data.port;
+        throw err;
       }
       return data.job;
     },

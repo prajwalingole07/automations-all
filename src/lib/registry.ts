@@ -1,5 +1,19 @@
 import { Automation } from './types';
 
+export const AUTOMATION_PORTS: Record<string, number> = {
+  'mhtcet-status-checker': 3000,
+  'cutoff-pdf-extractor': 5000,
+  'dse-choice-filling': 3000,
+  'cap-links-live-alert': 8577,
+  'cet-choice-filling-r1-r4': 3000,
+  'allotment-result-checker': 5000,
+  'cutoff-book-maker': 5000,
+};
+
+export function getAutomationPort(id: string): number {
+  return AUTOMATION_PORTS[id] || 3000;
+}
+
 export const INITIAL_AUTOMATIONS: Automation[] = [
   {
     id: 'mhtcet-status-checker',

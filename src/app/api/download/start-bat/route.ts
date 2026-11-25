@@ -26,9 +26,9 @@ set "TARGET_URL=${cloudUrl}"
 :: 1. Launch Chrome / Default Browser directly to Render Dashboard in a new tab/window
 echo [1/2] Opening Render Dashboard in Chrome...
 if exist "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" (
-    start "" "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" "%TARGET_URL%/dashboard"
+    start "" "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --new-window --incognito "%TARGET_URL%/dashboard"
 ) else if exist "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" (
-    start "" "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" "%TARGET_URL%/dashboard"
+    start "" "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" --new-window --inprivate "%TARGET_URL%/dashboard"
 ) else (
     start "" "%TARGET_URL%/dashboard"
 )
