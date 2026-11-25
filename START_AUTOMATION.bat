@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-title NEXUS Automation Hub - Direct Launcher (Render Cloud)
+title NEXUS Automation Hub - Direct Launcher
 color 0B
 cd /d "%~dp0"
 
@@ -20,39 +20,47 @@ if exist "cloud_url.txt" (
     )
 )
 
-echo [1/3] Target Cloud Hub: %TARGET_URL%
+:: Safety sanitize: Never use internal container port 10000 or localhost:10000 on Windows PC
+echo !TARGET_URL! | findstr /i "10000 localhost:10000 127.0.0.1:10000" >nul
+if !errorlevel! equ 0 (
+    set "TARGET_URL=https://ameautomations.onrender.com"
+)
 
-:: 1. Launch Chrome / Default Browser directly to Render Dashboard in a clean incognito window
-echo [2/3] Launching Render Dashboard in clean browser window...
+echo [1/2] Connecting to Cloud Hub: %TARGET_URL%
+
+:: 1. Launch Chrome / Default Browser directly to Render Dashboard in a new tab
+echo [2/2] Opening Render Dashboard in Chrome...
 if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" (
-    start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --new-window --incognito "%TARGET_URL%/dashboard"
+    start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" "%TARGET_URL%/dashboard"
 ) else if exist "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" (
-    start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --new-window --inprivate "%TARGET_URL%/dashboard"
+    start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "%TARGET_URL%/dashboard"
 ) else (
     start "" "%TARGET_URL%/dashboard"
 )
 
 :: 2. Start Local Windows Runner Agent directly
-echo.
-echo ==============================================================================
-echo [RUNNER ACTIVE] Connecting %COMPUTERNAME% to %TARGET_URL%...
-echo [MONITORING]    Heartbeat active. Ready to execute automations in new tabs.
-echo Leave this window open while automations run. Press Ctrl+C to terminate.
-echo ==============================================================================
-echo.
+set "RUNNER_SCRIPT="
+if exist "runner\runner.js" set "RUNNER_SCRIPT=runner\runner.js"
+if exist "runner.js" set "RUNNER_SCRIPT=runner.js"
+if exist "..\runner\runner.js" set "RUNNER_SCRIPT=..\runner\runner.js"
 
-set "RUNNER_DIR=%~dp0runner"
-if not exist "%RUNNER_DIR%" set "RUNNER_DIR=%~dp0automation-hub\runner"
-
-if exist "%RUNNER_DIR%\runner.js" (
-    cd /d "%RUNNER_DIR%"
+if defined RUNNER_SCRIPT (
+    echo.
+    echo ==============================================================================
+    echo [RUNNER ACTIVE] Connecting %COMPUTERNAME% to %TARGET_URL%...
+    echo [MONITORING]    Heartbeat active. Ready to execute automations.
+    echo Leave this window open while automations run. Press Ctrl+C to terminate.
+    echo ==============================================================================
+    echo.
     set "CLOUD_URL=%TARGET_URL%"
     set "MACHINE_NAME=%COMPUTERNAME%"
     set "RUNNER_SECRET_TOKEN=local-dev-runner"
-    node runner.js
+    node "%RUNNER_SCRIPT%"
 ) else (
+    echo.
     echo [RUNNER NOTICE] runner.js not found in current directory.
-    echo Dashboard opened in your browser. Automations can be run from the web interface.
+    echo Dashboard opened in your browser: %TARGET_URL%/dashboard
+    echo Automations can now be launched directly from the web dashboard.
 )
 
 pause

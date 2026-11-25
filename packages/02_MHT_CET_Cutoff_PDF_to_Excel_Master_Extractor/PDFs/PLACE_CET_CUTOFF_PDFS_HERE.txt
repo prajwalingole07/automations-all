@@ -1,0 +1,1 @@
+Place official Maharashtra CET CAP Round Cutoff PDFs in this folder to extract data into Excel.
