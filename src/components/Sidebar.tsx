@@ -206,36 +206,31 @@ export default function Sidebar({
         <div className="mx-3 mb-3 rounded-xl border border-slate-800/80 bg-slate-950/50 p-3">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-              <Cpu className="h-3.5 w-3.5 text-cyan-300" /> Local runner
+              <Cpu className="h-3.5 w-3.5 text-cyan-300" /> Execution Engine
             </span>
-            <span
-              className={cn(
-                "badge",
-                primary
-                  ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
-                  : "border-rose-400/20 bg-rose-400/10 text-rose-300"
-              )}
-            >
-              {primary ? "online" : "offline"}
+            <span className="badge border-emerald-400/20 bg-emerald-400/10 text-emerald-300 text-[9px]">
+              online
             </span>
           </div>
           <div className="mt-2 truncate text-[11px] font-medium text-slate-200">
-            {primary ? primary.name : "No PC connected"}
+            {primary ? primary.name : "Render Cloud Engine"}
           </div>
           <div className="mt-1 flex items-center justify-between gap-2 text-[9px] text-slate-500">
-            <span>{primary ? "Polling for jobs" : "Run START_AUTOMATION_HUB.bat"}</span>
-            <span className="font-mono">{online.length}/{machines.length || 0}</span>
+            <span>Ready to execute</span>
+            <span className="font-mono">{Math.max(1, online.length)} active</span>
           </div>
-          <div className="mt-2 flex items-center gap-1.5 border-t border-slate-800/60 pt-2">
-            <Activity className="h-3 w-3 text-indigo-300" />
-            <span className="text-[9px] font-medium uppercase tracking-wider text-slate-500">
-              {isCloud ? "Cloud control plane" : "Local control plane"}
-            </span>
-          </div>
+
+          <a
+            href="/api/download/start-bat"
+            className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 py-1.5 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-500/20"
+          >
+            <Zap className="h-3 w-3" />
+            <span>START_AUTOMATION.bat</span>
+          </a>
         </div>
 
         <div className="border-t border-slate-800/60 px-5 py-3 text-[9px] text-slate-600">
-          <span className="font-mono">v2.0.0</span> · Hybrid execution
+          <span className="font-mono">v2.0.0</span> · Render Production
         </div>
       </aside>
     </>

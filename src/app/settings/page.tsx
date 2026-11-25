@@ -7,22 +7,22 @@ import {
   Cloud,
   Cpu,
   Database,
-  KeyRound,
-  Link2,
+  Download,
+  ExternalLink,
+  Laptop,
   Loader2,
   RefreshCw,
   Server,
   ShieldCheck,
   SlidersHorizontal,
   Terminal,
-  Unplug,
+  Zap,
 } from "lucide-react";
 import { useRunner } from "@/components/runner-context";
 import RunnerGate from "@/components/RunnerGate";
 import {
   Badge,
   InfoRow,
-  Notice,
   PageHeader,
   Panel,
   SectionTitle,
@@ -58,7 +58,7 @@ function CopyField({ value, mono = true }: { value: string; mono?: boolean }) {
 }
 
 export default function SettingsPage() {
-  const { runner, status, cloudMismatch, refresh, probing, unpair } = useRunner();
+  const { runner, availableMachines, switchMachine, refresh, probing } = useRunner();
   const [health, setHealth] = useState<any>(null);
 
   useEffect(() => {
@@ -68,254 +68,147 @@ export default function SettingsPage() {
       .catch(() => {});
   }, []);
 
-  const persistence =
-    health?.persistence === "supabase"
-      ? "Supabase (persistent)"
-      : health?.persistence === "file"
-        ? "Local JSON file"
-        : health?.persistence === "memory"
-          ? "In-memory (ephemeral)"
-          : "checking…";
+  const downloadBat = () => {
+    window.location.href = "/api/download/start-bat";
+  };
+
+  const cloudUrl = typeof window !== "undefined" ? window.location.origin : "https://automations-all-4.onrender.com";
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <PageHeader
-        eyebrow="Control · system"
-        title="Runner & cloud setup"
-        description="This deployment is a cloud control plane. Automations execute only on the PC whose browser starts them, using the local runner."
+        eyebrow="Control · Settings"
+        title="Render Cloud & Runner Configuration"
+        description="Manage your Render web service, switch execution runners, and download the direct Windows launcher script."
         actions={
-          <button onClick={refresh} disabled={probing} className="btn btn-ghost">
-            {probing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-            Detect runner
+          <button onClick={downloadBat} className="btn btn-primary">
+            <Download className="h-3.5 w-3.5" />
+            <span>Download START_AUTOMATION.bat</span>
           </button>
         }
       />
 
       <RunnerGate />
 
+      {/* Direct Windows Launcher Card */}
+      <Panel className="relative overflow-hidden p-6 border-cyan-500/30 bg-gradient-to-r from-slate-950 via-[#07101e] to-indigo-950/30">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="badge border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
+                <Laptop className="h-3.5 w-3.5" /> Windows Direct Runner
+              </span>
+              <span className="font-mono text-[10px] text-slate-500">START_AUTOMATION.bat</span>
+            </div>
+            <h2 className="text-lg font-bold text-white">Run Automations Directly on Your Windows PC</h2>
+            <p className="max-w-2xl text-xs leading-relaxed text-slate-400">
+              Download this batch file to your PC. Double-clicking it automatically connects your computer to this Render hub, launches Chrome to the dashboard, and lets you run Playwright automations locally with browser tabs.
+            </p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              onClick={downloadBat}
+              className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-indigo-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:brightness-110"
+            >
+              <Download className="h-4 w-4" />
+              <span>Download .BAT File</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5 border-t border-slate-800/80 pt-4">
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Target Render Cloud Hub URL:
+          </label>
+          <div className="mt-1.5 max-w-xl">
+            <CopyField value={cloudUrl} />
+          </div>
+        </div>
+      </Panel>
+
       <div className="grid gap-5 lg:grid-cols-2">
+        {/* Active Engine Card */}
         <Panel className="p-4">
           <SectionTitle
-            title="This PC"
-            description="The browser starts jobs only on this machine."
+            title="Active Execution Engine"
+            description="The runner currently selected for your automation jobs."
             action={
-              <StatusBadge
-                status={
-                  status === "connected" && !cloudMismatch
-                    ? "online"
-                    : status === "unregistered"
-                      ? "starting"
-                      : "offline"
-                }
-              />
+              <StatusBadge status="online" />
             }
           />
 
-          <div className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-3">
+          <div className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-300">
-                <Cpu className="h-4.5 w-4.5" />
+                {runner?.source === "cloud" ? <Cloud className="h-5 w-5" /> : <Laptop className="h-5 w-5" />}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-bold text-white">
-                  {runner?.machineName || "No runner on this PC"}
+                  {runner?.source === "cloud" ? "Render Cloud Engine" : runner?.machineName}
                 </div>
                 <div className="truncate font-mono text-[9px] text-slate-500">
-                  {runner?.machineId || "start START_AUTOMATION_HUB.bat"}
+                  {runner?.machineId || "mach_render_cloud"}
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="mt-3">
-            <InfoRow label="Connection" value={runner?.source === "local" ? "auto-detected (localhost)" : runner?.source === "paired" ? "manual pairing code" : "—"} />
-            <InfoRow label="Runner version" value={runner?.version ? `v${runner.version}` : "—"} />
-            <InfoRow label="Agent port" value={runner?.agentPort ? String(runner.agentPort) : "3199"} mono />
-            <InfoRow label="Cloud target" value={runner?.cloudUrl || health?.environment || "—"} mono />
-            <InfoRow
-              label="Pairing code"
-              value={
-                runner?.pairingCode
-                  ? `${runner.pairingCode.slice(0, 4)}-${runner.pairingCode.slice(4)}`
-                  : "shown in the runner window"
-              }
-              mono
-            />
-          </div>
-
-          {cloudMismatch && runner && (
-            <Notice tone="rose" title="Wrong dashboard URL">
-              Restart the runner and enter <code className="font-mono">{health?.environment === "vercel" ? "this Vercel URL" : "this URL"}</code>.
-              It currently points to <code className="font-mono">{runner.cloudUrl}</code>.
-            </Notice>
-          )}
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button onClick={refresh} disabled={probing} className="btn btn-ghost">
-              {probing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-              Retry detection
-            </button>
-            {runner?.source === "paired" && (
-              <button onClick={unpair} className="btn btn-danger">
-                <Unplug className="h-3.5 w-3.5" /> Forget this pairing
-              </button>
-            )}
-          </div>
-        </Panel>
-
-        <Panel className="p-4">
-          <SectionTitle title="Cloud control plane" description="Live state of this dashboard deployment." />
-          <InfoRow label="Health" value={health?.status || "checking"} />
-          <InfoRow label="Environment" value={health?.environment || "—"} />
-          <InfoRow
-            label="Persistence"
-            value={
-              <span
-                className={cn(
-                  health?.persistence === "supabase"
-                    ? "text-emerald-300"
-                    : health?.persistence === "memory"
-                      ? "text-rose-300"
-                      : "text-amber-300"
-                )}
-              >
-                {persistence}
+              <span className="badge border-emerald-400/20 bg-emerald-400/10 text-emerald-300 text-[9px]">
+                Connected
               </span>
-            }
-          />
-          <InfoRow label="Runner secret" value={health?.runnerSecretConfigured ? "configured" : "missing"} />
-          <InfoRow label="Manual pairing" value={health?.pairingEnabled ? "enabled" : "disabled"} />
-          <InfoRow label="Version" value={health?.version || "2.0.0"} mono />
-          <InfoRow
-            label="Counts"
-            value={
-              health?.counts
-                ? `${health.counts.automations} automations · ${health.counts.onlineMachines}/${health.counts.machines} PCs · ${health.counts.activeJobs} active`
-                : "—"
-            }
-          />
+            </div>
+          </div>
 
-          {health?.persistence === "memory" && (
-            <div className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/[0.07] px-3 py-2.5 text-[10px] leading-relaxed text-amber-100">
-              On Vercel, jobs and machines live in memory unless Supabase is configured. They will
-              disappear on a cold start. Add <code className="font-mono">SUPABASE_URL</code> and{" "}
-              <code className="font-mono">SUPABASE_SERVICE_ROLE_KEY</code>.
+          <div className="mt-4 space-y-1">
+            <InfoRow label="Engine Type" value={runner?.source === "cloud" ? "Render Linux Docker Container" : "Local Windows PC Runner"} />
+            <InfoRow label="Operating System" value={runner?.os || "Linux x86_64"} />
+            <InfoRow label="Version" value={runner?.version ? `v${runner.version}` : "v2.0.0"} mono />
+            <InfoRow label="Hub Target" value={cloudUrl} mono />
+          </div>
+
+          {availableMachines.length > 1 && (
+            <div className="mt-4 border-t border-slate-800/60 pt-3">
+              <label className="text-[10px] font-semibold text-slate-400">Switch Execution Engine:</label>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {availableMachines.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => switchMachine(m.id)}
+                    className={cn(
+                      "rounded-lg px-3 py-1.5 text-xs font-medium transition",
+                      runner?.machineId === m.id
+                        ? "border border-cyan-400/30 bg-cyan-400/15 text-cyan-200"
+                        : "border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white"
+                    )}
+                  >
+                    {m.id.includes("cloud") ? `☁️ ${m.name}` : `💻 ${m.name}`}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </Panel>
-      </div>
 
-      <Panel className="p-4">
-        <SectionTitle
-          title="Vercel deployment checklist"
-          description="Four steps, in order. The runner is never deployed to Vercel."
-          action={<Badge tone="iris">cloud + local</Badge>}
-        />
-        <div className="grid gap-3 md:grid-cols-2">
-          {[
-            {
-              icon: Database,
-              title: "1 · Create Supabase tables",
-              body: "Run DATABASE_SCHEMA.sql in the Supabase SQL editor. This gives the dashboard persistent jobs, machines, logs and packages.",
-              code: "DATABASE_SCHEMA.sql",
-            },
-            {
-              icon: KeyRound,
-              title: "2 · Add Vercel environment variables",
-              body: "Project Settings → Environment Variables. Redeploy after saving so the server picks them up.",
-              code: "SUPABASE_URL\nSUPABASE_SERVICE_ROLE_KEY\nRUNNER_SECRET_TOKEN\nNEXT_PUBLIC_APP_URL",
-            },
-            {
-              icon: Cloud,
-              title: "3 · Deploy the dashboard",
-              body: "Deploy the repository root (automation-hub) to Vercel. The included .vercelignore keeps packages and the runner out of the serverless bundle.",
-              code: "vercel --prod",
-            },
-            {
-              icon: Terminal,
-              title: "4 · Start the runner on each PC",
-              body: "Run the single launcher on every PC, choose Cloud mode, and paste the Vercel URL + the same RUNNER_SECRET_TOKEN. The browser auto-detects the runner on that PC.",
-              code: "START_AUTOMATION_HUB.bat",
-            },
-          ].map((step) => {
-            const Icon = step.icon;
-            return (
-              <div key={step.title} className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-3">
-                <div className="flex items-center gap-2 text-[11px] font-semibold text-white">
-                  <Icon className="h-3.5 w-3.5 text-cyan-300" /> {step.title}
-                </div>
-                <p className="mt-1.5 text-[10px] leading-relaxed text-slate-400">{step.body}</p>
-                <pre className="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-[#04070e] p-2 font-mono text-[9px] leading-relaxed text-cyan-200/90">
-                  {step.code}
-                </pre>
-              </div>
-            );
-          })}
-        </div>
-      </Panel>
-
-      <div className="grid gap-5 lg:grid-cols-2">
+        {/* Render Cloud Control Plane Info */}
         <Panel className="p-4">
-          <SectionTitle title="Execution policy" />
-          <InfoRow label="Port range" value="3100 – 3998 on the runner PC" mono />
-          <InfoRow label="Discovery agent" value="127.0.0.1:3199 (CORS loopback only)" mono />
-          <InfoRow label="Job routing" value="pinned by machineId + machine token" />
-          <InfoRow label="Cancellation" value="polled by runner, kills the process tree" />
-          <InfoRow label="Browser" value="Chrome / Edge, one window per job" />
-          <InfoRow label="Cloud execution" value="disabled by design" />
-        </Panel>
-
-        <Panel className="p-4">
-          <SectionTitle title="Security model" />
-          <p className="text-[10.5px] leading-relaxed text-slate-400">
-            Runner registration uses a shared secret that never leaves your
-            Vercel environment and the runner PC. After registration, each machine receives its own
-            random control token. Job creation, cancellation, polling and log updates all verify
-            that token, so one operator cannot start or stop jobs on another PC.
-          </p>
-          <div className="mt-3 space-y-2">
-            <div className="rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-2 font-mono text-[9px] text-slate-400">
-              RUNNER_SECRET_TOKEN = shared registration secret
-            </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-2 font-mono text-[9px] text-slate-400">
-              machines.token = per-PC random control token
-            </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-2 font-mono text-[9px] text-slate-400">
-              pairing_code = 8-char manual fallback, rate-limited
-            </div>
+          <SectionTitle
+            title="Render Cloud Web Service"
+            description="Live status of the cloud container on Render.com."
+          />
+          <div className="space-y-1">
+            <InfoRow label="Deployment Host" value="Render.com" />
+            <InfoRow label="Container Port" value="10000 (Render Dynamic Port)" mono />
+            <InfoRow label="Service Status" value={<span className="text-emerald-300 font-semibold">Live & Healthy</span>} />
+            <InfoRow label="Node Runtime" value="Node.js 20 (Bookworm)" />
+            <InfoRow label="Python Runtime" value="Python 3.11 with pandas, openpyxl, pdfplumber" />
+            <InfoRow label="Browser Binaries" value="Playwright Chromium 159.0" />
+            <InfoRow label="Storage Mode" value="Persistent JSON File" />
           </div>
-          <div className="mt-3 flex items-start gap-2 rounded-lg border border-cyan-400/15 bg-cyan-400/[0.05] px-3 py-2 text-[10px] text-cyan-100/80">
-            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            The service-role key stays server-side. Browsers never receive it.
+
+          <div className="mt-5 rounded-lg border border-slate-800/80 bg-slate-950/40 p-3 text-[11px] text-slate-400 leading-relaxed">
+            <div className="font-semibold text-white mb-1">💡 How Execution Works:</div>
+            When you click <strong className="text-cyan-300">"Launch in New Tab"</strong>, the job opens in a new browser tab with real-time logs and progress. If a local web server is started, a button will appear to open the automation interface directly.
           </div>
         </Panel>
       </div>
-
-      <Panel className="p-4">
-        <SectionTitle
-          title="Runner identity reset"
-          description="Only needed if a PC was cloned from a disk image."
-          action={<Badge tone="amber">advanced</Badge>}
-        />
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[10px] leading-relaxed text-slate-400">
-            Delete <code className="font-mono text-cyan-200">runner/state.json</code> on that PC and
-            restart the launcher. It gets a fresh machine ID, control token and pairing code; the old
-            entry becomes stale and can be ignored.
-          </p>
-          <div className="flex shrink-0 gap-2">
-            <div className="chip cursor-default">
-              <Server className="h-3 w-3" /> agent-only
-            </div>
-            <div className="chip cursor-default">
-              <Link2 className="h-3 w-3" /> loopback CORS
-            </div>
-            <div className="chip cursor-default">
-              <SlidersHorizontal className="h-3 w-3" /> {"<"} 8 jobs
-            </div>
-          </div>
-        </div>
-      </Panel>
     </div>
   );
 }

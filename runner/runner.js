@@ -86,7 +86,7 @@ const config = {
     normalizeUrl(envValue('CLOUD_URL', 'HUB_URL')) ||
     normalizeUrl(diskConfig.cloudUrl) ||
     normalizeUrl(legacyCloudUrl) ||
-    'http://localhost:3080',
+    `http://localhost:${process.env.PORT || 10000}`,
   runnerSecret:
     envValue('RUNNER_SECRET_TOKEN', 'RUNNER_SECRET') ||
     String(diskConfig.runnerSecret || '') ||

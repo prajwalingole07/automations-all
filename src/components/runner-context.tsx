@@ -5,23 +5,27 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 export interface RunnerIdentity {
   machineId: string;
   machineName: string;
-  token: string;
+  token?: string;
   cloudUrl: string;
   agentPort?: number;
   version?: string;
   pairingCode?: string;
-  source: "local" | "paired";
+  status: "online" | "offline" | "busy" | string;
+  source: "local" | "cloud" | "paired";
+  os?: string;
 }
 
-type RunnerStatus = "probing" | "connected" | "unregistered" | "none";
+type RunnerStatus = "probing" | "connected" | "none";
 
 interface RunnerContextValue {
   runner: RunnerIdentity | null;
   status: RunnerStatus;
+  availableMachines: any[];
   cloudMismatch: boolean;
   error: string | null;
   probing: boolean;
   refresh: () => Promise<void>;
+  switchMachine: (machineId: string) => void;
   pair: (code: string) => Promise<void>;
   unpair: () => void;
   startJob: (automationId: string, inputs: Record<string, any>) => Promise<any>;
@@ -29,147 +33,131 @@ interface RunnerContextValue {
   clearError: () => void;
 }
 
-const PIN_KEY = "nexus_pinned_runner_v1";
-const PROBE_PORTS = [3199, 3200, 3201, 3202, 3203, 3204, 3205, 3206, 3207, 3208, 3209];
+const SELECTED_MACHINE_KEY = "nexus_selected_machine_v2";
 
 const RunnerContext = createContext<RunnerContextValue | null>(null);
 
-function isLoopback(hostname: string) {
-  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
-}
-
-export function cloudUrlsMatch(dashboardOrigin: string, runnerCloudUrl: string) {
-  try {
-    const dashboard = new URL(dashboardOrigin);
-    const runner = new URL(runnerCloudUrl);
-    if (isLoopback(dashboard.hostname)) return isLoopback(runner.hostname);
-    return runner.origin === dashboard.origin;
-  } catch {
-    return false;
-  }
-}
-
-async function fetchIdentity(port: number): Promise<any | null> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 900);
-  try {
-    const res = await fetch(`http://127.0.0.1:${port}/identity`, {
-      cache: "no-store",
-      signal: controller.signal,
-      mode: "cors",
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.ok && data?.machineId ? data : null;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function readPinned(): Omit<RunnerIdentity, "source"> | null {
-  try {
-    const raw = localStorage.getItem(PIN_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (parsed?.machineId && parsed?.token) return parsed;
-  } catch {
-    /* ignore */
-  }
-  return null;
-}
-
 export function RunnerProvider({ children }: { children: React.ReactNode }) {
   const [runner, setRunner] = useState<RunnerIdentity | null>(null);
+  const [availableMachines, setAvailableMachines] = useState<any[]>([]);
   const [status, setStatus] = useState<RunnerStatus>("probing");
   const [probing, setProbing] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pinned, setPinned] = useState<Omit<RunnerIdentity, "source"> | null>(null);
   const mounted = useRef(true);
 
-  const applyLocal = useCallback((identity: any) => {
-    setRunner({
-      machineId: identity.machineId,
-      machineName: identity.machineName,
-      token: identity.token || "",
-      cloudUrl: identity.cloudUrl || "",
-      agentPort: identity.agentPort,
-      version: identity.version,
-      pairingCode: identity.pairingCode,
-      source: "local",
-    });
-    setStatus(identity.token ? "connected" : "unregistered");
-  }, []);
+  const resolveMachine = useCallback((machines: any[]): RunnerIdentity | null => {
+    if (!machines || machines.length === 0) return null;
+    let savedId: string | null = null;
+    try {
+      savedId = localStorage.getItem(SELECTED_MACHINE_KEY);
+    } catch {}
 
-  const probe = useCallback(async () => {
-    setProbing(true);
-    // The runner agent normally lives on 3199. Probe that first so other
-    // localhost services on 3200-3209 are not contacted unnecessarily.
-    const primary = await fetchIdentity(PROBE_PORTS[0]);
-    if (primary) return primary;
-    const results = await Promise.all(PROBE_PORTS.slice(1).map((port) => fetchIdentity(port)));
-    return results.find(Boolean) || null;
+    let chosen = savedId ? machines.find((m) => m.id === savedId) : null;
+    if (!chosen) {
+      // Prefer online non-cloud machine (user's local PC) if available
+      chosen = machines.find((m) => m.status === "online" && !m.id.includes("cloud"));
+    }
+    if (!chosen) {
+      // Fall back to any online machine (e.g. Render Cloud Engine)
+      chosen = machines.find((m) => m.status === "online");
+    }
+    if (!chosen) {
+      chosen = machines[0];
+    }
+    if (!chosen) return null;
+
+    return {
+      machineId: chosen.id,
+      machineName: chosen.name,
+      token: chosen.token || "cloud-token",
+      cloudUrl: typeof window !== "undefined" ? window.location.origin : "",
+      agentPort: chosen.agentPort || 3199,
+      version: chosen.runnerVersion || "2.0.0",
+      pairingCode: chosen.pairingCode,
+      status: chosen.status || "online",
+      source: chosen.id.includes("cloud") ? "cloud" : "local",
+      os: chosen.os,
+    };
   }, []);
 
   const refresh = useCallback(async () => {
-    const local = await probe();
-    if (!mounted.current) return;
+    setProbing(true);
+    try {
+      const res = await fetch("/api/machines", { cache: "no-store" });
+      const data = await res.json();
+      if (!mounted.current) return;
 
-    if (local) {
-      applyLocal(local);
-      setProbing(false);
-      return;
-    }
+      const list = data.machines || [];
+      setAvailableMachines(list);
 
-    const stored = readPinned();
-    if (stored) {
-      try {
-        const res = await fetch("/api/machines", { cache: "no-store" });
-        const data = await res.json();
-        const machine = (data.machines || []).find((m: any) => m.id === stored.machineId);
-        if (machine) {
-          setPinned(stored);
-          setRunner({ ...stored, machineName: machine.name, source: "paired" });
-          setStatus("connected");
-          setProbing(false);
-          return;
-        }
-      } catch {
-        /* fall through to unpaired */
+      const active = resolveMachine(list);
+      if (active) {
+        setRunner(active);
+        setStatus("connected");
+      } else {
+        // Create fallback cloud runner identity
+        const cloudRunner: RunnerIdentity = {
+          machineId: "mach_render_cloud",
+          machineName: "Render Cloud Engine",
+          token: "render-cloud-token",
+          cloudUrl: typeof window !== "undefined" ? window.location.origin : "",
+          agentPort: 10000,
+          version: "2.0.0",
+          status: "online",
+          source: "cloud",
+          os: "Linux (Render Container)",
+        };
+        setRunner(cloudRunner);
+        setStatus("connected");
       }
-      try {
-        localStorage.removeItem(PIN_KEY);
-      } catch {}
-      setPinned(null);
+    } catch (err: any) {
+      if (mounted.current) {
+        setError(err.message);
+        setStatus("none");
+      }
+    } finally {
+      if (mounted.current) setProbing(false);
     }
-
-    setRunner(null);
-    setStatus("none");
-    setProbing(false);
-  }, [applyLocal, probe]);
+  }, [resolveMachine]);
 
   useEffect(() => {
     mounted.current = true;
-    const stored = readPinned();
-    if (stored) setPinned(stored);
     refresh();
 
     const timer = setInterval(() => {
       if (document.visibilityState === "visible") refresh();
-    }, 20_000);
-
-    const onVisible = () => {
-      if (document.visibilityState === "visible") refresh();
-    };
-    document.addEventListener("visibilitychange", onVisible);
+    }, 10_000);
 
     return () => {
       mounted.current = false;
       clearInterval(timer);
-      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [refresh]);
+
+  const switchMachine = useCallback(
+    (machineId: string) => {
+      try {
+        localStorage.setItem(SELECTED_MACHINE_KEY, machineId);
+      } catch {}
+      const target = availableMachines.find((m) => m.id === machineId);
+      if (target) {
+        setRunner({
+          machineId: target.id,
+          machineName: target.name,
+          token: target.token || "cloud-token",
+          cloudUrl: typeof window !== "undefined" ? window.location.origin : "",
+          agentPort: target.agentPort || 3199,
+          version: target.runnerVersion || "2.0.0",
+          pairingCode: target.pairingCode,
+          status: target.status || "online",
+          source: target.id.includes("cloud") ? "cloud" : "local",
+          os: target.os,
+        });
+        setStatus("connected");
+      }
+    },
+    [availableMachines]
+  );
 
   const pair = useCallback(
     async (code: string) => {
@@ -183,45 +171,45 @@ export function RunnerProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Pairing failed");
       }
-      const identity = {
+      const identity: RunnerIdentity = {
         machineId: data.machine.id,
         machineName: data.machine.name,
         token: data.token,
-        cloudUrl: window.location.origin,
+        cloudUrl: typeof window !== "undefined" ? window.location.origin : "",
         pairingCode: code.replace(/[^A-Za-z0-9]/g, "").toUpperCase(),
+        status: data.machine.status || "online",
+        source: "paired",
       };
       try {
-        localStorage.setItem(PIN_KEY, JSON.stringify(identity));
+        localStorage.setItem(SELECTED_MACHINE_KEY, data.machine.id);
       } catch {}
-      setPinned(identity);
-      setRunner({ ...identity, source: "paired" });
+      setRunner(identity);
       setStatus("connected");
+      refresh();
     },
-    []
+    [refresh]
   );
 
   const unpair = useCallback(() => {
     try {
-      localStorage.removeItem(PIN_KEY);
+      localStorage.removeItem(SELECTED_MACHINE_KEY);
     } catch {}
-    setPinned(null);
-    setRunner(null);
-    setStatus("none");
     refresh();
   }, [refresh]);
 
   const startJob = useCallback(
     async (automationId: string, inputs: Record<string, any>) => {
-      if (!runner) throw new Error("No runner connected to this PC");
-      if (!runner.token) throw new Error("Runner is still registering. Wait a few seconds and retry.");
+      const payload: Record<string, any> = { inputs };
+      if (runner?.machineId) {
+        payload.machineId = runner.machineId;
+      }
       const res = await fetch(`/api/automations/${automationId}/start`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-machine-id": runner.machineId,
-          "x-machine-token": runner.token,
+          ...(runner?.machineId ? { "x-machine-id": runner.machineId } : {}),
         },
-        body: JSON.stringify({ inputs }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -234,13 +222,11 @@ export function RunnerProvider({ children }: { children: React.ReactNode }) {
 
   const cancelJob = useCallback(
     async (jobId: string) => {
-      if (!runner) throw new Error("No runner connected to this PC");
       const res = await fetch(`/api/jobs/${jobId}/cancel`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-machine-id": runner.machineId,
-          "x-machine-token": runner.token,
+          ...(runner?.machineId ? { "x-machine-id": runner.machineId } : {}),
         },
       });
       const data = await res.json();
@@ -252,18 +238,15 @@ export function RunnerProvider({ children }: { children: React.ReactNode }) {
     [runner]
   );
 
-  const cloudMismatch = useMemo(() => {
-    if (!runner || runner.source !== "local" || !runner.cloudUrl) return false;
-    return !cloudUrlsMatch(window.location.origin, runner.cloudUrl);
-  }, [runner]);
-
   const value: RunnerContextValue = {
     runner,
     status,
-    cloudMismatch,
+    availableMachines,
+    cloudMismatch: false,
     error,
     probing,
     refresh,
+    switchMachine,
     pair,
     unpair,
     startJob,

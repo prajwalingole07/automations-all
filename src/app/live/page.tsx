@@ -51,13 +51,10 @@ function LiveMonitor() {
 
   useEffect(() => {
     let alive = true;
-    if (!machineId) {
-      setJobs([]);
-      return;
-    }
     const load = async () => {
       try {
-        const res = await fetch(`/api/jobs?machineId=${encodeURIComponent(machineId)}&limit=100`, {
+        const query = machineId ? `?machineId=${encodeURIComponent(machineId)}&limit=100` : `?limit=100`;
+        const res = await fetch(`/api/jobs${query}`, {
           cache: "no-store",
         });
         const data = await res.json();
@@ -74,7 +71,7 @@ function LiveMonitor() {
       } catch {}
     };
     load();
-    const timer = setInterval(load, 3000);
+    const timer = setInterval(load, 2500);
     return () => {
       alive = false;
       clearInterval(timer);
@@ -202,13 +199,9 @@ function LiveMonitor() {
             </div>
 
             <div className="max-h-[520px] overflow-y-auto">
-              {!machineId ? (
+              {jobs.length === 0 ? (
                 <div className="px-4 py-8 text-center text-[11px] text-slate-500">
-                  Connect the local runner to load jobs.
-                </div>
-              ) : jobs.length === 0 ? (
-                <div className="px-4 py-8 text-center text-[11px] text-slate-500">
-                  No jobs on this PC yet.
+                  No jobs queued yet. Launch an automation to begin.
                 </div>
               ) : (
                 <div className="divide-y divide-slate-800/40">
@@ -288,9 +281,10 @@ function LiveMonitor() {
                         href={currentJob.browserTabUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="btn btn-ghost border-cyan-400/25 bg-cyan-400/10 text-cyan-200"
+                        className="flex items-center gap-1.5 rounded-xl border border-cyan-400/40 bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 px-3.5 py-1.5 text-xs font-bold text-cyan-200 shadow-sm transition hover:bg-cyan-500/30"
                       >
-                        Open local app <ExternalLink className="h-3.5 w-3.5" />
+                        <span>Open Automation App (New Tab)</span>
+                        <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                     )}
                     {currentJob.allocatedPort && (

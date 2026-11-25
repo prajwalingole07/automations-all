@@ -74,5 +74,5 @@ ENV NODE_ENV=production
 # Expose server port (Render routes dynamic PORT to this container)
 EXPOSE 10000
 
-# Start command
-CMD ["npm", "start"]
+# Start command: launches cloud runner in background and Next.js production server
+CMD ["sh", "-c", "HEADLESS=true CLOUD_URL=http://127.0.0.1:${PORT:-10000} MACHINE_NAME='Render Cloud Engine' node runner/runner.js & npm start"]

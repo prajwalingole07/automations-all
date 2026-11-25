@@ -63,23 +63,19 @@ export default function AutomationDetailPage({ params }: { params: { id: string 
       .finally(() => setLoading(false));
   }, [params.id, machineId]);
 
-  const canRun = Boolean(runner?.token) && !cloudMismatch;
+  const canRun = true;
 
   const handleStart = async () => {
     if (!automation) return;
-    if (!canRun) {
-      setMessage({ type: "error", text: "Connect this PC's runner first (runner chip in the top bar)." });
-      return;
-    }
     setStarting(true);
     setMessage(null);
     try {
       const job = await startJob(automation.id, inputs);
       setMessage({
         type: "success",
-        text: `Queued on ${job.machineName}. The runner will open Chrome on this PC when ready.`,
+        text: `Queued on ${job.machineName}. Execution started in a new tab!`,
       });
-      setTimeout(() => router.push(`/live?jobId=${job.id}`), 700);
+      window.open(`/live?jobId=${job.id}`, "_blank");
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
     } finally {
@@ -141,12 +137,12 @@ export default function AutomationDetailPage({ params }: { params: { id: string 
           </div>
 
           <div className="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row lg:flex-col">
-            <button onClick={handleStart} disabled={starting || !canRun} className="btn btn-primary px-5 py-3">
+            <button onClick={handleStart} disabled={starting} className="btn btn-primary px-5 py-3">
               {starting ? <Spinner className="text-slate-950" /> : <Play className="h-4 w-4 fill-current" />}
-              {starting ? "Queuing…" : "Run on this PC"}
+              {starting ? "Queuing…" : "Launch in New Tab"}
             </button>
             <div className="text-center text-[9px] text-slate-500">
-              {runner ? `pinned to ${runner.machineName}` : "runner offline on this PC"}
+              {runner ? `Engine: ${runner.machineName}` : "Render Cloud Engine"}
             </div>
           </div>
         </div>
@@ -236,9 +232,9 @@ export default function AutomationDetailPage({ params }: { params: { id: string 
                 <Globe className="h-3 w-3" />
                 Ports are allocated on this PC at runtime, never in the cloud.
               </div>
-              <button onClick={handleStart} disabled={starting || !canRun} className="btn btn-primary px-5">
+              <button onClick={handleStart} disabled={starting} className="btn btn-primary px-5">
                 {starting ? <Spinner className="text-slate-950" /> : <Play className="h-3.5 w-3.5 fill-current" />}
-                {starting ? "Queuing…" : "Launch on this PC"}
+                {starting ? "Queuing…" : "Launch in New Tab"}
               </button>
             </div>
           </Panel>
