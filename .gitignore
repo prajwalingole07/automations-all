@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+packages/**/node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# runtime state (never commit another PC's identity)
+runner/state.json
+runner/runtime.json
+data/uploads/
+logs/
+*.log
+
+# secrets
+.env
+.env*.local
+
+# archives / os noise
+*.zip
+.DS_Store
+Thumbs.db
