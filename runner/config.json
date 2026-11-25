@@ -1,6 +1,0 @@
-{
-  "pollIntervalMs": 2000,
-  "heartbeatIntervalMs": 8000,
-  "maxConcurrentJobs": 4,
-  "agentPort": 3199
-}
