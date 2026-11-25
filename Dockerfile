@@ -5,7 +5,7 @@ FROM node:20-bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
-ENV PORT=3080
+ENV PORT=10000
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
@@ -72,7 +72,7 @@ RUN npm run build
 ENV NODE_ENV=production
 
 # Expose server port (Render routes dynamic PORT to this container)
-EXPOSE 3080
+EXPOSE 10000
 
 # Start command
 CMD ["npm", "start"]
