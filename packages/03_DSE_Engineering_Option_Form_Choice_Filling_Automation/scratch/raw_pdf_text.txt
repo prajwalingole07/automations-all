@@ -1,0 +1,266 @@
+Institute
+CODE INSTITUTE 	CITY 	Branch Code 	BRANCH NAME 	CATEGORY 	Min Rank 	Max Perc
+6207 Dr. D. Y. Patil Unitech Societys Dr. D. Y. Patil
+Institute of Technology, Pimpri, Pune Pune 	620737210 Electronics and Telecommunication
+Engg EWS
+6311
+Jayawant Shikshan Prasarak Mandal,
+Bhivarabai Sawant Institute of Technology &
+Research, Wagholi
+Pune 	631124510 	Computer Engineering 	EWS
+6310
+Nutan Maharashtra Vidya Prasarak Mandal,
+Nutan Maharashtra Institute of Engineering
+&Technology, Talegaon station, Pune
+Pune 	631024510 	Computer Engineering 	EWS
+6732 Ajeenkya DY Patil School of Engineering,
+Lohegaon, Pune Pune 	673224510 	Computer Engineering 	EWS
+6184 K. J.s Educational Institut Trinity College of
+Engineering and Research, Pisoli, Haveli Pune 	618424510 	Computer Engineering 	EWS
+6311
+Jayawant Shikshan Prasarak Mandal,
+Bhivarabai Sawant Institute of Technology &
+Research, Wagholi
+Pune 	631124610 	Information Technology 	EWS
+6179 Indira College of Engineering & Management,
+Pune Pune 	617924510 	Computer Engineering 	EWS
+10297 	85.39
+10420 	85.31
+6145 JSPM'S Jaywantrao Sawant College of
+Engineering,Pune PUNE 	614524510 	Computer Engineering 	EWS 	10577 	85.25
+6156 Marathwada Mitra Mandal's College of
+Engineering, Karvenagar, Pune Pune 	615637210 Electronics and Telecommunication
+Engg EWS 	10681 	85.18
+6145 JSPM'S Jaywantrao Sawant College of
+Engineering,Pune PUNE 	614524610 	Information Technology 	EWS 	11234 	84.86
+6139 Progressive Education Society's Modern
+College of Engineering, Pune Pune 	613937210 Electronics and Telecommunication
+Engg EWS 	11794 	84.53
+11872 	84.51
+6755 	JSPM Narhe Technical Campus 	PUNE 	675524510 	Computer Engineering 	EWS 	12084 	84.38
+6177 Sinhgad College of Engineering, Vadgaon (BK),
+Pune PUNE 	617737210 Electronics and Telecommunication
+Engg EWS 	12219 	84.29
+12735 	84.06
+6281 Modern Education Society's Wadia College of
+Engineering Pune 	628137210 Electronics and Telecommunication
+Engg EWS 	12883 	84
+13270 	83.77
+6755 	JSPM Narhe Technical Campus 	PUNE 	675526310 	AI & Data Science 	EWS 	13899 	83.47
+13970 	83.43
+14414 	83.2
+6122 TSSMSs Pd. Vasantdada Patil Institute of
+Technology, Bavdhan, Pune PUNE 	612291210 Computer Science and
+Engineering(Data Science) EWS 	14524 	83.14
+6298 Zeal Education Societys Zeal College of
+Engineering & Research, Narhe, Pune Pune 	629824510 	Computer Engineering 	EWS 	14615 	83.09
+
+-- 1 of 5 --
+
+6732 Ajeenkya DY Patil School of Engineering,
+Lohegaon, Pune Pune 	673299510 Artificial Intelligence and Data
+Science EWS
+6310
+Nutan Maharashtra Vidya Prasarak Mandal,
+Nutan Maharashtra Institute of Engineering
+&Technology, Talegaon station, Pune
+Pune 	631024610 	Information Technology 	EWS
+EWS
+6182
+Sinhgad Technical Education Society, Sinhgad
+Institute of Technology and Science, Narhe
+(Ambegaon)
+Pune 	618224510 	Computer Engineering 	EWS
+6182
+Sinhgad Technical Education Society, Sinhgad
+Institute of Technology and Science, Narhe
+(Ambegaon)
+Pune 	618224610 	Information Technology 	EWS
+6179 Indira College of Engineering & Management,
+Pune Pune 	617924610 	Information Technology 	EWS
+6310
+Nutan Maharashtra Vidya Prasarak Mandal,
+Nutan Maharashtra Institute of Engineering
+&Technology, Talegaon station, Pune
+Pune 	631037210 Electronics and Telecommunication
+Engg EWS
+6311
+Jayawant Shikshan Prasarak Mandal,
+Bhivarabai Sawant Institute of Technology &
+Research, Wagholi
+Pune 	631137210 Electronics and Telecommunication
+Engg EWS
+6649 TSSMs Bhivarabai Sawant College of
+Engineering and Research, Narhe, Pune Pune 	664924510 	Computer Engineering 	EWS
+6307 Dhole Patil Education Society, Dhole Patil
+College of Engineering, Wagholi, Tal. Haveli Pune 	630724510 	Computer Engineering 	EWS
+6179 Indira College of Engineering & Management,
+Pune Pune 	617937210 Electronics and Telecommunication
+Engg EWS
+EWS
+6772 NBN Sinhgad Technical Institutes Campus,
+Pune Pune 	677224510 	Computer Engineering 	EWS
+6310
+Nutan Maharashtra Vidya Prasarak Mandal,
+Nutan Maharashtra Institute of Engineering
+&Technology, Talegaon station, Pune
+Pune 	631091310 Computer Science and Engineering
+(Artificial Intelligence) EWS
+15443 	0.8269
+15453 	82.69
+6203 Marathwada Mitra Mandals Institute of
+Technology 620324510 	Computer Engineering 	15541 	82.63
+15949 	82.44
+16324 	82.25
+16612 	82.11
+6794 Anantrao Pawar College of Engineering &
+Research, Pune PUNE 	679424510 	Computer Engineering 	EWS 	16787 	82.06
+16992 	81.94
+17235 	81.82
+17315 	81.77
+17567 	81.66
+17997 	81.47
+6203 Marathwada Mitra Mandals Institute of
+Technology 620399510 Artificial Intelligence and Data
+Science 18202 	81.37
+18401 	81.26
+6145 JSPM'S Jaywantrao Sawant College of
+Engineering,Pune PUNE 	614537210 Electronics and Telecommunication
+Engg EWS 	18599 	81.18
+18667 	81.14
+Pune
+Pune
+
+-- 2 of 5 --
+
+6834 Dr.D.Y.Patil College Of Engineering &
+Innovation,Talegaon PUNE 	683424510 	Computer Engineering 	EWS 	18692 	81.14
+EWS 	18734 	81.12
+6187 Sinhgad Academy of Engineering, Kondhwa
+(BK) PUNE 	618724510 	Computer Engineering 	EWS 	18912 	81.03
+6298 Zeal Education Societys Zeal College of
+Engineering & Research, Narhe, Pune Pune 	629824610 	Information Technology 	EWS 	19845 	80.6
+6284
+Vidya Pratishthans Kamalnayan Bajaj Institute
+of Engineering & Technology, Baramati
+Dist.Pune
+Baramati 	628499510 Artificial Intelligence and Data
+Science EWS 	11027 	84.97
+6275 Shivnagar Vidya Prasarak Mandals College of
+Engineering, Malegaon-Baramati (Un-Aided) Baramati 	627524510 	Computer Engineering 	EWS 	15471 	82.69
+6250
+D.Y. Patil College of Engineering and
+Technology, Kolhapur 	Kolhapur 	625091210
+Computer Science and Engineering
+(Data Science) 	EWS 	11248 	84.86
+12741 	84.06
+6268
+Tatyasaheb Kore Institute of Engineering and
+Technology, Warananagar (Un-Aided
+Autonomous) 	Kolhapur 	626824210 	Computer Science and Engineering 	EWS 	12943 	83.94
+6268
+Tatyasaheb Kore Institute of Engineering and
+Technology, Warananagar (Un-Aided
+Autonomous) 	Kolhapur 	626837210
+Electronics and Telecommunication
+Engineering 	EWS 	14120 	83.35
+6268
+Tatyasaheb Kore Institute of Engineering and
+Technology, Warananagar (Un-Aided
+Autonomous) 	Kolhapur 	626826210
+Computer Science and Business
+Systems 	EWS 	15442 	82.69
+15666 	82.57
+16468 	82.18
+16719 	82.06
+6178
+Sinhgad Technical Education Society's Smt.
+Kashibai Navale College of
+Engineering,Vadgaon,Pune
+Pune 	617837210 Electronics and Telecommunication
+Engg
+6811 	Sanjay Ghodawat Institute 	Kolhapur 	681124210 	Computer Science and Engineering 	EWS
+6780
+D.Y.Patil Education Societys,D.Y.Patil
+Technical Campus, Faculty of Engineering &
+Faculty of Management,Talsande,Kolhapur 	Kolhapur 	678024210 	Computer Science and Engineering 	EWS
+6288
+Bharati Vidyapeeths College of Engineering,
+Kolhapur 	Kolhapur 	628891110
+Computer Science and
+Engineering(Artificial Intelligence and
+Machine Learning) 	EWS
+6811 	Sanjay Ghodawat Institute 	Kolhapur 	681137210
+Electronics and Telecommunication
+Engg 	EWS
+
+-- 3 of 5 --
+
+6288
+Bharati Vidyapeeths College of Engineering,
+Kolhapur 	Kolhapur 	628837210
+Electronics and Telecommunication
+Engg 	EWS
+6288
+Bharati Vidyapeeths College of Engineering,
+Kolhapur 	Kolhapur 	628824210 	Computer Science and Engineering 	EWS
+6780
+D.Y.Patil Education Societys,D.Y.Patil
+Technical Campus, Faculty of Engineering &
+Faculty of Management,Talsande,Kolhapur 	Kolhapur 	678091210
+Computer Science and
+Engineering(Data Science) 	EWS
+5181
+Gokhale Education Societys, R.H. Sapat
+College of Engineering, Management Studies
+and Research, Nashik 	Nashik 	518124510 	Computer Engineering 	EWS
+5121
+K. K. Wagh Institute of Engineering Education
+and Research, Nashik 	Nashik 	512137210
+Electronics and Telecommunication
+Engg 	EWS
+5244
+METs Institute of Technology Polytechnic,
+Bhujbal Knowledge City, Adgaon Nashik 	Nashik 	524425710 	Computer Science and Design 	EWS
+5181
+Gokhale Education Societys, R.H. Sapat
+College of Engineering, Management Studies
+and Research, Nashik 	Nashik 	518199510
+Artificial Intelligence and Data
+Science 	EWS
+5330
+PVGCOE & SHRIKRUSHNA S.
+DHAMANKAR INSTITUTE OF
+MANAGEMENT, NASHIK 	Nashik 	533024510 	Computer Engineering 	EWS
+16900 	82
+17574 	81.66
+17817 	81.54
+5108
+Maratha Vidya Prasarak Samajs Karmaveer
+Adv. Baburao Ganpatrao Thakare College Of
+Engineering 	NASHIK 	510824610 	Information Technology 	EWS 	10659 	85.2
+5151
+MET Bhujbal Knowledge City MET Leagues
+Engineering College, Adgaon, Nashik 	NASHIK 	515199510
+Artificial Intelligence and Data
+Science 	EWS 	11214 	84.88
+13155 	83.83
+5108
+Maratha Vidya Prasarak Samajs Karmaveer
+Adv. Baburao Ganpatrao Thakare College Of
+Engineering 	NASHIK 	510826310 	Artificial Intelligence & Data Science 	EWS 	13626 	83.6
+16966 	81.94
+17358 	81.77
+18411 	81.26
+5108
+Maratha Vidya Prasarak Samajs Karmaveer
+Adv. Baburao Ganpatrao Thakare College Of
+Engineering 	NASHIK 	510837210 	Electronics & Telecommunication 	EWS 	19082 	80.94
+19387 	80.81
+
+-- 4 of 5 --
+
+
+
+-- 5 of 5 --
+

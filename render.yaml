@@ -1,0 +1,14 @@
+# Render Blueprint Specification
+services:
+  - type: web
+    name: ameautomations
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: RUNNER_SECRET_TOKEN
+        value: local-dev-runner
